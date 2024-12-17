@@ -1,0 +1,41 @@
+name: Build and Deploy iOS App
+
+on:
+  push:
+    branches:
+      - master   # 當推送到 master 分支時觸發
+  pull_request:
+    branches:
+      - master   # 當對 master 分支進行拉取請求時觸發
+
+jobs:
+  build:
+    runs-on: macos-latest   # 使用 macOS 虛擬環境
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install -g expo-cli
+
+      - name: Set up Expo
+        run: |
+          npx expo install
+
+      - name: Build the app for iOS
+        run: |
+          eas build --platform ios --profile production
+
+      - name: Upload IPA file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-app-ios
+          path: ./build/ios/*.ipa
